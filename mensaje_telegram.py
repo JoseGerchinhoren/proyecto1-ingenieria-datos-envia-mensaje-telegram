@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
-from googletrans import Translator
 import telegram_config
+from googletrans import Translator
 
 query = 'Salta'
 api_key = telegram_config.API_KEY_WAPI
@@ -35,6 +35,11 @@ def enviar_mensaje_telegram(mensaje, df_rain):
     token = telegram_config.TOKEN
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     
+    # Convertir la columna 'Fecha' al formato de fecha deseado (si aún no está en ese formato)
+    df['Fecha'] = pd.to_datetime(df['Fecha'])
+    # Modificar el formato de fecha a 'dd/mm/aaaa'
+    df['Fecha'] = df['Fecha'].dt.strftime('%d/%m/%Y')
+
     # Crear una instancia del traductor
     translator = Translator()
 
@@ -64,10 +69,11 @@ def enviar_mensaje_telegram(mensaje, df_rain):
     except Exception as e:
         print(f"Error al enviar el mensaje: {str(e)}")
 
+# Llamada de ejemplo
 # Construcción del mensaje mejorado
 mensaje = f"""
 Hola!
-El pronóstico de lluvia para hoy {df_rain.index[0]} en {query} es el siguiente:
+El pronóstico de lluvia para hoy {df['Fecha'][0]} en {query} es el siguiente:
 
 {df_rain.to_string()}
 """
