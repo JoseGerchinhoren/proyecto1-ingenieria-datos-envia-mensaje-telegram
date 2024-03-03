@@ -31,7 +31,7 @@ df_rain = df[(df['Lluvia'] == 1) & (df['Hora'] > 6) & (df['Hora'] < 23)]
 df_rain = df_rain[['Hora', 'Condicion']]
 df_rain.set_index('Hora', inplace=True)
 
-def enviar_mensaje_telegram(mensaje):
+def enviar_mensaje_telegram():
     token = telegram_config.TOKEN
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     
@@ -39,7 +39,29 @@ def enviar_mensaje_telegram(mensaje):
     df['Fecha'] = pd.to_datetime(df['Fecha'])
     # Modificar el formato de fecha a 'dd/mm/aaaa'
     df['Fecha'] = df['Fecha'].dt.strftime('%d/%m/%Y')
-    
+
+    # Crear una instancia del traductor
+    translator = Translator()
+
+    # Iterar sobre cada fila del DataFrame y traducir el texto en la columna "Condicion"
+    for index, row in df_rain.iterrows():
+        # Obtener el texto en la columna "Condicion"
+        texto_a_traducir = row['Condicion']
+
+        # Traducir el texto al idioma deseado, por ejemplo, al español ('es')
+        texto_traducido = translator.translate(texto_a_traducir, dest='es').text
+
+        # Actualizar el valor en la columna "Condicion" con el texto traducido
+        df_rain.at[index, 'Condicion'] = texto_traducido
+
+    # Construcción del mensaje mejorado
+    mensaje = f"""
+    Hola!
+    El pronóstico de lluvia para hoy {df['Fecha'][0]} en {query} es el siguiente:
+
+    {df_rain.to_string()}
+    """
+
     parametros = {
         'chat_id': 5410219790,
         'text': mensaje
@@ -55,28 +77,5 @@ def enviar_mensaje_telegram(mensaje):
     except Exception as e:
         print(f"Error al enviar el mensaje: {str(e)}")
 
-# Crear una instancia del traductor
-translator = Translator()
-
-# Iterar sobre cada fila del DataFrame y traducir el texto en la columna "Condicion"
-for index, row in df_rain.iterrows():
-    # Obtener el texto en la columna "Condicion"
-    texto_a_traducir = row['Condicion']
-
-    # Traducir el texto al idioma deseado, por ejemplo, al español ('es')
-    texto_traducido = translator.translate(texto_a_traducir, dest='es').text
-
-    # Actualizar el valor en la columna "Condicion" con el texto traducido
-    df_rain.at[index, 'Condicion'] = texto_traducido
-
-# Llamada de ejemplo
-# Construcción del mensaje mejorado
-mensaje = f"""
-Hola!
-El pronóstico de lluvia para hoy {df['Fecha'][0]} en {query} es el siguiente:
-
-{df_rain.to_string()}
-"""
-
 # Envío del mensaje
-enviar_mensaje_telegram(mensaje)
+enviar_mensaje_telegram()
