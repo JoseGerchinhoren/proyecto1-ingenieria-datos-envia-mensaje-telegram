@@ -1,0 +1,13 @@
+Crear un Bot de Telegram:
+Abre la aplicación de Telegram y busca a "BotFather".
+Inicia una conversación con BotFather.
+Utiliza el comando /newbot para crear un nuevo bot. Sigue las instrucciones de BotFather para darle un nombre al bot y asignarle un nombre de usuario.
+BotFather te proporcionará un token de acceso para tu bot. Guarda este token, ya que lo necesitarás para interactuar con el bot a través de la API de Telegram.
+
+Obtener tu ID de chat:
+Una vez que hayas creado tu bot, busca a tu bot por su nombre de usuario en Telegram.
+Inicia una conversación con tu bot.
+Ahora necesitarás obtener tu ID de chat. Puedes hacerlo utilizando un bot como "Userinfobot".
+Busca a "Userinfobot" en Telegram y comienza una conversación con él.
+Una vez que hayas iniciado una conversación con "Userinfobot", simplemente haz clic en el botón "Start" o escribe /start.
+"Userinfobot" te proporcionará información sobre tu cuenta de Telegram, incluyendo tu ID de chat. Guarda esta ID, ya que la necesitarás para enviar mensajes desde tu bot a tu propio chat.

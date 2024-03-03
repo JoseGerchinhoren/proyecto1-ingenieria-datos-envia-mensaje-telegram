@@ -1,0 +1,44 @@
+Pasos en EC2:
+git clone https://github.com/JoseGerchinhoren/proyecto1-ingenieria-datos-envia-pronostico
+
+cd proyecto1-ingenieria-datos-envia-pronostico
+
+nano mensaje_telegram.py (Para editar el archivo .py, modifique la linea de API_KEY_WAPI y  de TOKEN, tambien saque el import telegram_config)
+
+ctrl + s (guarda)
+crtl + x (sale)
+
+
+Luego ejecute lo siguiente para poder usar pip e instalar las dependencias:
+sudo apt update
+sudo apt upgrade
+sudo apt install python3-pip
+
+seleccionar ssh.service
+
+Luego ejecute:
+pip install -r requirements.txt
+
+
+Y finalmente:
+python3 mensaje_telegram.py
+
+
+Envio correctamente el mensaje por telegram. Ahora tengo que automatizar el proceso.
+
+Sat Mar  2 15:47 UTC 2024
+
+Sat Mar  2 12:47 UTC 2024
+
+Luego ejecutar:
+crontab -e (para editar crontab, la primera vez sale menu poner 1)
+
+crontab -l (para ver el archivo crontab)
+
+date (para ver la fecha y hora del servidor)
+
+coloque esto en crontab:
+30 10 * * * python3 /home/ubuntu/proyecto1-ingenieria-datos-envia-pronostico/mensaje_telegram.py
+
+seria para que se ejecute a las 7:30 todos los dias
+
