@@ -3,13 +3,18 @@ import requests
 import telegram_config
 from googletrans import Translator
 
+# Query para la ubicación
 query = 'Salta'
+# Clave de API de WeatherAPI
 api_key = telegram_config.API_KEY_WAPI
 
+# URL para obtener el pronóstico del clima
 url_clima = f'http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={query}&days=1&aqi=no&alerts=no'
 
+# Obtener la respuesta de la API del clima en formato JSON
 response = requests.get(url_clima).json()
 
+# Función para obtener los detalles del pronóstico del clima para una hora específica
 def get_forecast(response, i):
     fecha = response['forecast']['forecastday'][0]['hour'][i]['time'].split()[0] # Fecha
     hora = int(response['forecast']['forecastday'][0]['hour'][i]['time'].split()[1].split(':')[0]) # Hora
@@ -19,20 +24,33 @@ def get_forecast(response, i):
     prob_rain = response['forecast']['forecastday'][0]['hour'][i]['chance_of_rain'] # Posibilidad de lluvia
     return fecha, hora, condicion, tempe, rain, prob_rain
 
+# Lista para almacenar los detalles del pronóstico del clima
 datos = []
 
+# Iterar sobre las horas en el pronóstico y obtener los detalles
 for i in range(len(response['forecast']['forecastday'][0]['hour'])):
     datos.append(get_forecast(response, i))
 
+# Definir los nombres de las columnas del DataFrame
 col = ['Fecha', 'Hora', 'Condicion', 'Temperatura', 'Lluvia', 'prob_lluvia']
+
+# Crear un DataFrame con los detalles del pronóstico del clima
 df = pd.DataFrame(datos, columns=col)
 
+# Filtrar las horas de lluvia entre las 6:00 y las 23:00
 df_rain = df[(df['Lluvia'] == 1) & (df['Hora'] > 6) & (df['Hora'] < 23)]
+
+# Seleccionar las columnas relevantes
 df_rain = df_rain[['Hora', 'Condicion']]
+
+# Establecer la hora como índice
 df_rain.set_index('Hora', inplace=True)
 
+# Función para enviar el mensaje al telegram
 def enviar_mensaje_telegram():
+    # Token de acceso al bot de Telegram
     token = telegram_config.TOKEN
+    # URL para enviar el mensaje
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     
     # Convertir la columna 'Fecha' al formato de fecha deseado (si aún no está en ese formato)
