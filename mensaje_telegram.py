@@ -16,6 +16,16 @@ response = requests.get(url_clima).json()
 
 # Función para obtener los detalles del pronóstico del clima para una hora específica
 def get_forecast(response, i):
+    """
+    Obtiene los detalles del pronóstico del clima para una hora específica.
+
+    Parámetros:
+    - response (dict): La respuesta de la API del clima en formato JSON.
+    - i (int): El índice de la hora para la cual se desea obtener el pronóstico.
+
+    Retorna:
+    Tuple: Una tupla con la fecha, hora, condición climática, temperatura, indicador de lluvia y probabilidad de lluvia.
+    """
     fecha = response['forecast']['forecastday'][0]['hour'][i]['time'].split()[0] # Fecha
     hora = int(response['forecast']['forecastday'][0]['hour'][i]['time'].split()[1].split(':')[0]) # Hora
     condicion = response['forecast']['forecastday'][0]['hour'][i]['condition']['text'] # Condicion
@@ -48,6 +58,9 @@ df_rain.set_index('Hora', inplace=True)
 
 # Función para enviar el mensaje al telegram
 def enviar_mensaje_telegram():
+    """
+    Envía un mensaje al chat de Telegram con el pronóstico del clima.
+    """
     # Token de acceso al bot de Telegram
     token = telegram_config.TOKEN
     # URL para enviar el mensaje
@@ -61,24 +74,37 @@ def enviar_mensaje_telegram():
     # Crear una instancia del traductor
     translator = Translator()
 
-    # Iterar sobre cada fila del DataFrame y traducir el texto en la columna "Condicion"
-    for index, row in df_rain.iterrows():
-        # Obtener el texto en la columna "Condicion"
-        texto_a_traducir = row['Condicion']
+    # Verificar si hay horas de lluvia
+    if not df_rain.empty:
+        # Iterar sobre cada fila del DataFrame y traducir el texto en la columna "Condicion"
+        for index, row in df_rain.iterrows():
+            # Obtener el texto en la columna "Condicion"
+            texto_a_traducir = row['Condicion']
 
-        # Traducir el texto al idioma deseado, por ejemplo, al español ('es')
-        texto_traducido = translator.translate(texto_a_traducir, dest='es').text
+            # Verificar si el texto no está vacío
+            if texto_a_traducir.strip():  # Verifica si el texto no está vacío
+                # Intentar traducir el texto al idioma deseado, por ejemplo, al español ('es')
+                try:
+                    texto_traducido = translator.translate(texto_a_traducir, dest='es').text
+                except Exception as e:
+                    print(f"Error al traducir el texto: {str(e)}")
+                    texto_traducido = texto_a_traducir  # En caso de error, mantener el texto original
+            else:
+                texto_traducido = texto_a_traducir  # Si el texto está vacío, mantenerlo como está
 
-        # Actualizar el valor en la columna "Condicion" con el texto traducido
-        df_rain.at[index, 'Condicion'] = texto_traducido
+            # Actualizar el valor en la columna "Condicion" con el texto traducido o el original
+            df_rain.at[index, 'Condicion'] = texto_traducido
 
-    # Construcción del mensaje mejorado
-    mensaje = f"""
-    Hola!
-    El pronóstico de lluvia para hoy {df['Fecha'][0]} en {query} es el siguiente:
+        # Construcción del mensaje mejorado
+        mensaje = f"""
+        Hola! El pronóstico de lluvia para hoy {df['Fecha'][0]} en {query} es el siguiente:
 
-    {df_rain.to_string()}
-    """
+        {df_rain.to_string()}
+        """
+
+    else:
+        # Construir mensaje indicando que no va a llover en ninguna hora
+        mensaje = f"No hay pronóstico de lluvia para hoy en {query}."
 
     parametros = {
         'chat_id': 5410219790,
