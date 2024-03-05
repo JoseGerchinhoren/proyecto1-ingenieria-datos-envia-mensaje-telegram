@@ -16,16 +16,6 @@ response = requests.get(url_clima).json()
 
 # Función para obtener los detalles del pronóstico del clima para una hora específica
 def get_forecast(response, i):
-    """
-    Obtiene los detalles del pronóstico del clima para una hora específica.
-
-    Parámetros:
-    - response (dict): La respuesta de la API del clima en formato JSON.
-    - i (int): El índice de la hora para la cual se desea obtener el pronóstico.
-
-    Retorna:
-    Tuple: Una tupla con la fecha, hora, condición climática, temperatura, indicador de lluvia y probabilidad de lluvia.
-    """
     fecha = response['forecast']['forecastday'][0]['hour'][i]['time'].split()[0] # Fecha
     hora = int(response['forecast']['forecastday'][0]['hour'][i]['time'].split()[1].split(':')[0]) # Hora
     condicion = response['forecast']['forecastday'][0]['hour'][i]['condition']['text'] # Condicion
@@ -56,11 +46,16 @@ df_rain = df_rain[['Hora', 'Condicion']]
 # Establecer la hora como índice
 df_rain.set_index('Hora', inplace=True)
 
+# Configuración del archivo de registro
+log_file = "registro.log"
+
+# Función para escribir en el archivo de registro
+def escribir_log(mensaje):
+    with open(log_file, "a") as log:
+        log.write(mensaje + "\n")
+
 # Función para enviar el mensaje al telegram
 def enviar_mensaje_telegram():
-    """
-    Envía un mensaje al chat de Telegram con el pronóstico del clima.
-    """
     # Token de acceso al bot de Telegram
     token = telegram_config.TOKEN
     # URL para enviar el mensaje
@@ -87,7 +82,9 @@ def enviar_mensaje_telegram():
                 try:
                     texto_traducido = translator.translate(texto_a_traducir, dest='es').text
                 except Exception as e:
-                    print(f"Error al traducir el texto: {str(e)}")
+                    error = f"Error al traducir el texto: {str(e)}"
+                    print(error)
+                    escribir_log(error)
                     texto_traducido = texto_a_traducir  # En caso de error, mantener el texto original
             else:
                 texto_traducido = texto_a_traducir  # Si el texto está vacío, mantenerlo como está
@@ -116,10 +113,15 @@ def enviar_mensaje_telegram():
         datos_respuesta = respuesta.json()
         if datos_respuesta['ok']:
             print("Mensaje enviado exitosamente.")
+            escribir_log("Mensaje enviado exitosamente.")
         else:
-            print(f"No se pudo enviar el mensaje: {datos_respuesta['descripcion']}")
+            mensaje_error = f"No se pudo enviar el mensaje: {datos_respuesta['descripcion']}"
+            print(mensaje_error)
+            escribir_log(mensaje_error)
     except Exception as e:
-        print(f"Error al enviar el mensaje: {str(e)}")
+        error = f"Error al enviar el mensaje: {str(e)}"
+        print(error)
+        escribir_log(error)
 
 # Envío del mensaje
 enviar_mensaje_telegram()
