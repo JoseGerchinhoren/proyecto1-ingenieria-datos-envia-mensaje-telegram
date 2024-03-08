@@ -17,6 +17,11 @@ def formatear_fecha(fecha_str):
     fecha = datetime.strptime(fecha_str, "%Y-%m-%dT%H:%M:%S.%fZ")
     return fecha.strftime("%d/%m/%Y")
 
+# Función para escribir en el archivo de registro
+def escribir_log(mensaje):
+    with open("registro_dolar.log", "a") as log:
+        log.write(mensaje + "\n")
+
 # Función para enviar el mensaje al Telegram
 def enviar_mensaje_telegram(mensaje):
     token = telegram_config.TOKEN_DOLAR
@@ -30,10 +35,13 @@ def enviar_mensaje_telegram(mensaje):
         datos_respuesta = respuesta.json()
         if datos_respuesta['ok']:
             print("Mensaje enviado exitosamente.")
+            escribir_log("Mensaje enviado exitosamente.")
         else:
             print("No se pudo enviar el mensaje:", datos_respuesta['description'])
+            escribir_log(f"No se pudo enviar el mensaje: {datos_respuesta['description']}")
     except Exception as e:
         print("Error al enviar el mensaje:", str(e))
+        escribir_log(f"Error al enviar el mensaje: {str(e)}")
 
 # Obtener el precio del dólar blue
 data_dolar = obtener_precio_dolar()
