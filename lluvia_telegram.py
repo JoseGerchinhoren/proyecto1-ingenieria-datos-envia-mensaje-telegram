@@ -94,7 +94,7 @@ def enviar_mensaje_telegram():
 
         # Construcción del mensaje mejorado
         mensaje = f"""
-        Hola! El pronóstico de lluvia para hoy {df['Fecha'][0]} en {query} es el siguiente:
+        El pronóstico de lluvia para hoy {df['Fecha'][0]} en {query} es el siguiente:
 
         {df_rain.to_string()}
         """

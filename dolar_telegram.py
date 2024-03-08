@@ -23,11 +23,11 @@ def escribir_log(mensaje):
         log.write(mensaje + "\n")
 
 # Función para enviar el mensaje al Telegram
-def enviar_mensaje_telegram(mensaje):
+def enviar_mensaje_telegram(mensaje, idchat):
     token = telegram_config.TOKEN_DOLAR
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     parametros = {
-        'chat_id': 5410219790,
+        'chat_id': idchat,
         'text': mensaje
     }
     try:
@@ -56,4 +56,7 @@ else:
     mensaje = "No se pudo obtener el precio del dólar en este momento."
 
 # Envío del mensaje
-enviar_mensaje_telegram(mensaje)
+enviar_mensaje_telegram(mensaje, 5410219790)
+
+# Envío del mensaje
+enviar_mensaje_telegram(mensaje, 6095568233)
